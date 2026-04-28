@@ -12,31 +12,26 @@ components:
       memoryLimit: 4Gi
       cpuLimit: "2"
 commands:
-  - id: install-vscode-extensions
+  - id: write-workspace-config
     exec:
       component: tools
       commandLine: |
-        BIN="$(command -v code || command -v che-code || true)"
-        if [ -z "$BIN" ]; then
-          echo "code/che-code binary not found; skipping extension install"
-          exit 0
-        fi
-        "$BIN" --install-extension Continue.continue --force || true
-        "$BIN" --install-extension ms-python.python --force || true
-        "$BIN" --install-extension ms-toolsai.jupyter --force || true
-        "$BIN" --install-extension redhat.ansible --force || true
-        "$BIN" --install-extension redhat.vscode-yaml --force || true
-        "$BIN" --install-extension yzhang.markdown-all-in-one --force || true
-        "$BIN" --install-extension ms-vscode.live-server --force || true
-        "$BIN" --install-extension ms-azuretools.vscode-containers --force || true
-        "$BIN" --install-extension redhat.vscode-podman --force || true
-      workingDir: /projects
-
-  - id: write-continue-config-gpt
-    exec:
-      component: tools
-      commandLine: |
-        mkdir -p "${HOME}/.continue"
+        mkdir -p /projects/.vscode /projects/.continue
+        cat > /projects/.vscode/extensions.json <<'EOF'
+        {
+          "recommendations": [
+            "Continue.continue",
+            "ms-python.python",
+            "ms-toolsai.jupyter",
+            "redhat.ansible",
+            "redhat.vscode-yaml",
+            "yzhang.markdown-all-in-one",
+            "ms-vscode.live-server",
+            "ms-azuretools.vscode-containers",
+            "redhat.vscode-podman"
+          ]
+        }
+        EOF
         printf '%s\n' \
           'name: Local Assistant' \
           'version: 1.0.0' \
@@ -55,10 +50,9 @@ commands:
           '  - provider: problems' \
           '  - provider: folder' \
           '  - provider: codebase' \
-          > "${HOME}/.continue/config.yaml"
+          > /projects/.continue/config.yaml
       workingDir: /projects
 
 events:
   postStart:
-    - install-vscode-extensions
-    - write-continue-config-gpt
+    - write-workspace-config
