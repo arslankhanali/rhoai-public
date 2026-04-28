@@ -12,17 +12,30 @@ components:
       memoryLimit: 4Gi
       cpuLimit: "2"
 commands:
-  - id: install-continue-extension
+  - id: install-vscode-extensions
     exec:
       component: tools
       commandLine: >
         if command -v code >/dev/null 2>&1; then
-          code --install-extension Continue.continue --force || true;
+          BIN=code;
         elif command -v che-code >/dev/null 2>&1; then
-          che-code --install-extension Continue.continue --force || true;
+          BIN=che-code;
         else
           echo "che-code binary not found; skipping extension install";
+          exit 0;
         fi
+        for EXT in \
+          Continue.continue \
+          ms-python.python \
+          ms-toolsai.jupyter \
+          redhat.ansible \
+          redhat.vscode-yaml \
+          yzhang.markdown-all-in-one \
+          ms-vscode.live-server \
+          ms-azuretools.vscode-containers \
+          redhat.vscode-podman; do
+          "$BIN" --install-extension "$EXT" --force || true;
+        done
       workingDir: /projects
 
   - id: write-continue-config-gpt
@@ -53,5 +66,5 @@ commands:
 
 events:
   postStart:
-    - install-continue-extension
+    - install-vscode-extensions
     - write-continue-config-gpt
