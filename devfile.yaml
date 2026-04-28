@@ -36,7 +36,7 @@ commands:
         EOF
 
         # Write directly to /projects/.continue
-        cat > /projects/.continue/config.yaml <<'EOF'
+        cat > /home/user/.continue/config.yaml <<'EOF'
         name: Local Assistant
         version: 1.0.0
         schema: v1
