@@ -1,0 +1,57 @@
+schemaVersion: 2.2.0
+metadata:
+  name: rhoai-devspaces-continue
+  displayName: RHOAI Dev Spaces with Continue
+  description: Dev Spaces workspace that bootstraps Continue and GPT endpoint config.
+components:
+  - name: tools
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel9
+      mountSources: true
+      sourceMapping: /projects
+      memoryLimit: 4Gi
+      cpuLimit: "2"
+commands:
+  - id: install-continue-extension
+    exec:
+      component: tools
+      commandLine: >
+        if command -v code >/dev/null 2>&1; then
+          code --install-extension Continue.continue --force || true;
+        elif command -v che-code >/dev/null 2>&1; then
+          che-code --install-extension Continue.continue --force || true;
+        else
+          echo "che-code binary not found; skipping extension install";
+        fi
+      workingDir: /projects
+
+  - id: write-continue-config-gpt
+    exec:
+      component: tools
+      commandLine: >
+        mkdir -p "${HOME}/.continue" &&
+        cat > "${HOME}/.continue/config.yaml" <<'EOF'
+        name: Local Assistant
+        version: 1.0.0
+        schema: v1
+        models:
+          - name: gpt-oss-20b
+            provider: openai
+            model: "gpt-oss-20b"
+            apiBase: "http://gpt-oss-20b-predictor.canberra.svc.cluster.local:8080/v1"
+            apiKey: "dummy"
+        context:
+          - provider: code
+          - provider: docs
+          - provider: diff
+          - provider: terminal
+          - provider: problems
+          - provider: folder
+          - provider: codebase
+        EOF
+      workingDir: /projects
+
+events:
+  postStart:
+    - install-continue-extension
+    - write-continue-config-gpt
