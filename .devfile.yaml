@@ -15,53 +15,47 @@ commands:
   - id: install-vscode-extensions
     exec:
       component: tools
-      commandLine: >
-        if command -v code >/dev/null 2>&1; then
-          BIN=code;
-        elif command -v che-code >/dev/null 2>&1; then
-          BIN=che-code;
-        else
-          echo "che-code binary not found; skipping extension install";
-          exit 0;
+      commandLine: |
+        BIN="$(command -v code || command -v che-code || true)"
+        if [ -z "$BIN" ]; then
+          echo "code/che-code binary not found; skipping extension install"
+          exit 0
         fi
-        for EXT in \
-          Continue.continue \
-          ms-python.python \
-          ms-toolsai.jupyter \
-          redhat.ansible \
-          redhat.vscode-yaml \
-          yzhang.markdown-all-in-one \
-          ms-vscode.live-server \
-          ms-azuretools.vscode-containers \
-          redhat.vscode-podman; do
-          "$BIN" --install-extension "$EXT" --force || true;
-        done
+        "$BIN" --install-extension Continue.continue --force || true
+        "$BIN" --install-extension ms-python.python --force || true
+        "$BIN" --install-extension ms-toolsai.jupyter --force || true
+        "$BIN" --install-extension redhat.ansible --force || true
+        "$BIN" --install-extension redhat.vscode-yaml --force || true
+        "$BIN" --install-extension yzhang.markdown-all-in-one --force || true
+        "$BIN" --install-extension ms-vscode.live-server --force || true
+        "$BIN" --install-extension ms-azuretools.vscode-containers --force || true
+        "$BIN" --install-extension redhat.vscode-podman --force || true
       workingDir: /projects
 
   - id: write-continue-config-gpt
     exec:
       component: tools
-      commandLine: >
-        mkdir -p "${HOME}/.continue" &&
-        cat > "${HOME}/.continue/config.yaml" <<'EOF'
-        name: Local Assistant
-        version: 1.0.0
-        schema: v1
-        models:
-          - name: gpt-oss-20b
-            provider: openai
-            model: "gpt-oss-20b"
-            apiBase: "http://gpt-oss-20b-predictor.canberra.svc.cluster.local:8080/v1"
-            apiKey: "dummy"
-        context:
-          - provider: code
-          - provider: docs
-          - provider: diff
-          - provider: terminal
-          - provider: problems
-          - provider: folder
-          - provider: codebase
-        EOF
+      commandLine: |
+        mkdir -p "${HOME}/.continue"
+        printf '%s\n' \
+          'name: Local Assistant' \
+          'version: 1.0.0' \
+          'schema: v1' \
+          'models:' \
+          '  - name: gpt-oss-20b' \
+          '    provider: openai' \
+          '    model: "gpt-oss-20b"' \
+          '    apiBase: "http://gpt-oss-20b-predictor.canberra.svc.cluster.local:8080/v1"' \
+          '    apiKey: "dummy"' \
+          'context:' \
+          '  - provider: code' \
+          '  - provider: docs' \
+          '  - provider: diff' \
+          '  - provider: terminal' \
+          '  - provider: problems' \
+          '  - provider: folder' \
+          '  - provider: codebase' \
+          > "${HOME}/.continue/config.yaml"
       workingDir: /projects
 
 events:
