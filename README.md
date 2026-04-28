@@ -1,8 +1,1 @@
-# openshift-llms
-
-# GitOps
-Important kinds
-1. odhdashboardconfig
-2. acceleratorprofile
-
-
+# Red Hat OpenShift AI (RHOAI)
