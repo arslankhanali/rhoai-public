@@ -50,7 +50,7 @@ commands:
           '  - provider: problems' \
           '  - provider: folder' \
           '  - provider: codebase' \
-          > /projects/.continue/config.yaml
+          > ~/.continue/config.yaml
       workingDir: /projects
 
 events:
